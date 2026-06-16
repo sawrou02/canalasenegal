@@ -261,3 +261,157 @@ export const listOperationsBancaires = async (): Promise<OperationBancaire[]> =>
   const res = await apiClient.get<OperationBancaire[]>('/operations-bancaires')
   return Array.isArray(res.data) ? res.data : []
 }
+
+// ---- Rapport d'activité ----
+
+export type StatutMatching = 'EN_ATTENTE' | 'MATCHE' | 'ECART'
+
+export interface RapportActivite {
+  id: string
+  date: string
+  fichierImporte: string
+  montantTotal: number
+  sat: number
+  fibre: number
+  rex: number
+  nbReabo: number
+  caReabo: number
+  nbRecru: number
+  caFormule: number
+  caCreatZ4: number
+  caCreatGZ: number
+  caCreatG11: number
+  caPayech: number
+  caAccessoires: number
+  statutMatching: StatutMatching
+  importeLe: string
+  importePar: { prenom: string; nom: string }
+}
+
+export interface RapportStats {
+  count: number
+  caCumule: number
+  matches: number
+  ecarts: number
+  enAttente: number
+}
+
+export interface RapportPreview {
+  fichier: string
+  lignesDetectees: number
+  montantTotal: number
+  parType: {
+    recrutement: { nb: number; montant: number }
+    reabonnement: { nb: number; montant: number }
+    migration: { nb: number; montant: number }
+  }
+  jours: string[]
+}
+
+export interface RapportImportResult {
+  fichier: string
+  joursImportes: number
+  joursIgnores: number
+  lignesDetectees: number
+  montantTotal: number
+}
+
+export const listRapports = async (): Promise<RapportActivite[]> => {
+  const res = await apiClient.get<RapportActivite[]>('/rapports')
+  return Array.isArray(res.data) ? res.data : []
+}
+
+export const rapportStats = async (): Promise<RapportStats> => {
+  const res = await apiClient.get<RapportStats>('/rapports/stats')
+  return res.data
+}
+
+export const previewRapport = async (file: File): Promise<RapportPreview> => {
+  const form = new FormData()
+  form.append('file', file)
+  const res = await apiClient.post<RapportPreview>('/rapports/preview', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return res.data
+}
+
+export const importRapport = async (file: File): Promise<RapportImportResult> => {
+  const form = new FormData()
+  form.append('file', file)
+  const res = await apiClient.post<RapportImportResult>('/rapports/import', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return res.data
+}
+
+export const matcherRapport = async (id: string): Promise<RapportActivite> => {
+  const res = await apiClient.patch<RapportActivite>(`/rapports/${id}/matcher`)
+  return res.data
+}
+
+// ---- Matching ----
+
+export interface MatchingLigne {
+  libelle: string
+  rapport: number
+  encaisse: number
+  ecart: number
+}
+
+export interface MatchingResult {
+  date: string
+  rapportId: string | null
+  found: boolean
+  statutMatching: string
+  lignes: MatchingLigne[]
+}
+
+export const getMatching = async (date: string): Promise<MatchingResult> => {
+  const res = await apiClient.get<MatchingResult>('/matching', { params: { date } })
+  return res.data
+}
+
+// ---- Commissions ----
+
+export interface CommissionParams {
+  bonusMateriel: number
+  tauxFormule: number
+  tauxReabo: number
+  primeMigration: number
+  deductionParNonQualifie: number
+}
+
+export interface CommissionLigne {
+  pdv: { code: string; raisonSociale: string }
+  nbRecru: number
+  caRecru: number
+  nbReabo: number
+  caReabo: number
+  nbMigration: number
+  comRecrutement: number
+  comFormule: number
+  comReabo: number
+  primeMigration: number
+  comNette: number
+}
+
+export interface CommissionTotaux {
+  comBrute: number
+  deductions: number
+  comNette: number
+  partenaires: number
+}
+
+export interface CommissionsResult {
+  periode: string
+  params: CommissionParams
+  lignes: CommissionLigne[]
+  totaux: CommissionTotaux
+}
+
+export const getCommissions = async (periode?: string): Promise<CommissionsResult> => {
+  const res = await apiClient.get<CommissionsResult>('/commissions', {
+    params: periode ? { periode } : undefined,
+  })
+  return res.data
+}

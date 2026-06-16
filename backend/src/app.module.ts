@@ -12,6 +12,8 @@ import { AuditModule } from './audit/audit.module';
 import { VersementsModule } from './versements/versements.module';
 import { RetraitsModule } from './retraits/retraits.module';
 import { OperationsBancairesModule } from './operations-bancaires/operations-bancaires.module';
+import { RapportsModule } from './rapports/rapports.module';
+import { CommissionsModule } from './commissions/commissions.module';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { OperationsBancairesModule } from './operations-bancaires/operations-ban
     VersementsModule,
     RetraitsModule,
     OperationsBancairesModule,
+    RapportsModule,
+    CommissionsModule,
   ],
   providers: [
     {

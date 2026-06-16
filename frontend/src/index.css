@@ -64,17 +64,28 @@ body {
   background: #374151;
 }
 
-/* Print: only the receipt is visible when printing */
+/* Print: only the receipt / commissions card is visible when printing */
 @media print {
   body * {
     visibility: hidden;
   }
   #receipt-print,
-  #receipt-print * {
+  #receipt-print *,
+  #commissions-print,
+  #commissions-print * {
     visibility: visible;
   }
   #receipt-print {
     position: absolute;
     inset: 0;
+  }
+  #commissions-print {
+    position: absolute;
+    inset: 0;
+    border: none;
+    box-shadow: none;
+  }
+  .no-print {
+    display: none !important;
   }
 }

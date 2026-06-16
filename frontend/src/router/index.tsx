@@ -13,9 +13,12 @@ import VadeursPage from '../pages/parametrage/VadeursPage'
 import ComptesPdvPage from '../pages/parametrage/ComptesPdvPage'
 import EncaissementPage from '../pages/operations/EncaissementPage'
 import SuiviSoldePage from '../pages/operations/SuiviSoldePage'
+import RapportActivitePage from '../pages/operations/RapportActivitePage'
+import MatchingPage from '../pages/operations/MatchingPage'
 import VersementsPage from '../pages/finances/VersementsPage'
 import RetraitsPage from '../pages/finances/RetraitsPage'
 import DetailsBancairesPage from '../pages/finances/DetailsBancairesPage'
+import CommissionsPage from '../pages/finances/CommissionsPage'
 
 function ProtectedRoute() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -48,6 +51,9 @@ export const router = createBrowserRouter([
       { path: 'app/pdv-comptes', element: <ComptesPdvPage /> },
       { path: 'app/encaissement', element: <EncaissementPage /> },
       { path: 'app/suivi-solde', element: <SuiviSoldePage /> },
+      { path: 'app/rapport-activite', element: <RapportActivitePage /> },
+      { path: 'app/matching', element: <MatchingPage /> },
+      { path: 'app/ana-commissions', element: <CommissionsPage /> },
       { path: 'app/versement-banque', element: <VersementsPage /> },
       { path: 'app/retrait-banque', element: <RetraitsPage /> },
       { path: 'app/details-bancaires', element: <DetailsBancairesPage /> },

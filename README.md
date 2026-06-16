@@ -113,7 +113,10 @@ IBM Plex Mono (montants/codes).
       sur des données **réelles**. Durcissement : Helmet, rate-limiting (login),
       secret JWT obligatoire, validation stricte. Anti-saut-de-page (scrollbar
       gutter + squelettes à hauteur fixe).
-- [ ] Étape 5 — Rapports & contrôle (Import, Matching, Commissions)
+- [x] **Étape 5 — Rapports & contrôle** : Import Excel (`.xlsx` via exceljs,
+      aperçu + idempotence anti-doublon), Matching rapport vs encaissements
+      (écarts), Commissions (calcul mensuel réel par PDV : bonus recrutement +
+      10 % CA formule + 10 % CA réabo + prime migration − déductions).
 - [ ] Étape 6 — Service Abonnement
 - [ ] Étape 7 — Logistique (SAT, G11, Accessoires, VAD)
 - [ ] Étape 8 — Analytique (États, Suivi Commercial, Statistiques)
