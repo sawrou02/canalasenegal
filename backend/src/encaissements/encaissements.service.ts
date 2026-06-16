@@ -1,12 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEncaissementDto } from './dto/create-encaissement.dto';
+import { computeEncaissement, OPTION_PRICES } from '../domain/calculations';
 
-export const OPTION_PRICES = {
-  premium: 6000,
-  intl: 6000,
-  timbre: 100,
-};
+export { OPTION_PRICES };
 
 const ENCAISSEMENT_INCLUDE = {
   abonne: { select: { numAbonne: true, nom: true, prenom: true } },
@@ -25,13 +22,12 @@ export class EncaissementsService {
     });
 
     const options = dto.options || {};
-    const optionsTotal =
-      (options.premium ? OPTION_PRICES.premium : 0) +
-      (options.intl ? OPTION_PRICES.intl : 0) +
-      (options.timbre ? OPTION_PRICES.timbre : 0);
-
-    const montantTotal = formule.prixFormule * dto.nbMois + optionsTotal;
-    const monnaieRendue = dto.montantRecu - montantTotal;
+    const { montantTotal, monnaieRendue } = computeEncaissement(
+      formule.prixFormule,
+      dto.nbMois,
+      options,
+      dto.montantRecu,
+    );
 
     if (monnaieRendue < 0) {
       throw new BadRequestException('Montant reçu insuffisant');

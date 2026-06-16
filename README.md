@@ -122,4 +122,7 @@ IBM Plex Mono (montants/codes).
 - [x] **Étape 8 — Analytique / Statistiques** : CA par PDV, classement PDV
       (podium), poids des formules, recrutement par user, ARPU, matériels vendus,
       et journal d'audit réel (admin-only). Agrégats réels par période.
-- [ ] Étape 9 — Finitions (exports, audit, tests, polish)
+- [x] **Étape 9 — Finitions** : tests unitaires (Jest, 22 tests sur encaissement /
+      commissions / soldes / matching), logique métier extraite dans `src/domain/`,
+      documentation API Swagger (`/api/docs`), seed enrichi (données du mois courant
+      pour dashboard/analytics/commissions).

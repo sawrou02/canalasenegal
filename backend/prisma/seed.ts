@@ -1637,6 +1637,129 @@ async function main() {
 
   console.log('Mouvements de stock created');
 
+  // ============================================================
+  // ENCAISSEMENTS DU MOIS COURANT (~40, idempotents enc-cur-001..040)
+  // Garantit que dashboard/stats, analytics/* (période = mois courant)
+  // et commissions affichent des données riches pour le mois en cours.
+  // ============================================================
+  const curRef = new Date();
+  const curYear = curRef.getFullYear();
+  const curMonth = curRef.getMonth();
+  const curToday = curRef.getDate();
+
+  // Arrays of REAL seeded ids only (FKs must resolve).
+  const curPdvs = [
+    pdv1, pdv2, pdv3, pdv4, pdv5, pdv6,
+    pdv7, pdv8, pdv9, pdv10, pdv11, pdv12,
+  ];
+  const curUsers = [userVendeur, userCommercial, userManager];
+  const curAbonnes = [
+    abonne1, abonne2, abonne3, abonne4, abonne5, abonne6, abonne7, abonne8,
+    abonne9, abonne10, abonne11, abonne12, abonne13, abonne14, abonne15,
+  ];
+  const curFormules = [
+    formuleAccess, formuleEvasion, formuleEvasionPlus, formuleToutCanal, formulePrestige,
+  ];
+  // Weighted toward REABONNEMENT and RECRUTEMENT (MIGRATION rarer).
+  const curNatures = [
+    NatureEncaissement.REABONNEMENT,
+    NatureEncaissement.RECRUTEMENT,
+    NatureEncaissement.REABONNEMENT,
+    NatureEncaissement.RECRUTEMENT,
+    NatureEncaissement.REABONNEMENT,
+    NatureEncaissement.MIGRATION,
+    NatureEncaissement.RECRUTEMENT,
+  ];
+  const curModes = [
+    ModePaiement.WAVE,
+    ModePaiement.ORANGE_MONEY,
+    ModePaiement.ESPECE,
+    ModePaiement.CHEQUE,
+  ];
+  const curNbMoisCycle = [1, 1, 1, 3, 6, 12];
+
+  const CUR_COUNT = 40;
+  for (let i = 0; i < CUR_COUNT; i++) {
+    const seq = String(i + 1).padStart(3, '0');
+    const id = `enc-cur-${seq}`;
+
+    // Spread across many distinct days of the current month, clamp to today.
+    let day = ((i * 3) % 28) + 1; // 1..28, varied per index
+    if (day > curToday) day = ((i % curToday) + 1);
+    if (day > curToday) day = curToday; // final safety clamp
+    const date = new Date(curYear, curMonth, day, 10, 0, 0);
+
+    const formule = curFormules[i % curFormules.length];
+    const nbMois = curNbMoisCycle[i % curNbMoisCycle.length];
+    const montantTotal = formule.prixFormule * nbMois;
+    // Occasional overpay (every 7th) to vary montantRecu.
+    const montantRecu = i % 7 === 0 ? montantTotal + 500 : montantTotal;
+
+    const data = {
+      id,
+      abonneId: curAbonnes[i % curAbonnes.length].id,
+      pdvId: curPdvs[i % curPdvs.length].id,
+      userId: curUsers[i % curUsers.length].id,
+      nature: curNatures[i % curNatures.length],
+      formuleId: formule.id,
+      nbMois,
+      montantTotal,
+      montantRecu,
+      monnaie: 'XOF',
+      modePaiement: curModes[i % curModes.length],
+      options: i % 5 === 0 ? { premium: true } : {},
+      date,
+      recuNumero: `RC-CUR-${seq}`,
+    };
+
+    await prisma.encaissement.upsert({
+      where: { id },
+      update: data,
+      create: data,
+    });
+  }
+
+  console.log('Encaissements du mois courant created');
+
+  // ============================================================
+  // VERSEMENTS EN ATTENTE DU MOIS COURANT (KPIs finance "en attente")
+  // ============================================================
+  const curPeriode = `${curYear}-${String(curMonth + 1).padStart(2, '0')}`;
+  const curVersementsData = [
+    {
+      id: 'vers-cur-001',
+      pdvId: pdv1.id,
+      montant: 175000,
+      banqueId: banque1.id,
+      dateVersement: new Date(curYear, curMonth, Math.min(5, curToday), 9, 0, 0),
+      periode: curPeriode,
+      libelle: 'Versement mois courant (en attente)',
+      numBordereau: 'BRD-CUR-001',
+      statut: VersementStatut.ENATTENTE,
+    },
+    {
+      id: 'vers-cur-002',
+      pdvId: pdv5.id,
+      montant: 95000,
+      banqueId: banque3.id,
+      dateVersement: new Date(curYear, curMonth, Math.min(8, curToday), 9, 0, 0),
+      periode: curPeriode,
+      libelle: 'Versement mois courant (en attente)',
+      numBordereau: 'BRD-CUR-002',
+      statut: VersementStatut.ENATTENTE,
+    },
+  ];
+
+  for (const vers of curVersementsData) {
+    await prisma.versement.upsert({
+      where: { id: vers.id },
+      update: vers,
+      create: vers,
+    });
+  }
+
+  console.log('Versements du mois courant created');
+
   console.log('Seed completed successfully!');
   console.log('');
   console.log('Test accounts (password: Demo123!):');

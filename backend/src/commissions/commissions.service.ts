@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { computeCommission } from '../domain/calculations';
 
 /**
  * Business-rule constants for commission computation. Exposed explicitly
@@ -100,13 +101,16 @@ export class CommissionsService {
           nbMigration: 0,
         } as PdvAggregate);
 
-      const comRecrutement = a.nbRecru * COMMISSION_PARAMS.bonusMateriel;
-      const comFormule = COMMISSION_PARAMS.tauxFormule * a.caRecru;
-      const comReabo = COMMISSION_PARAMS.tauxReabo * a.caReabo;
-      const primeMigration =
-        COMMISSION_PARAMS.primeMigration * a.nbMigration;
-      const comNette =
-        comRecrutement + comFormule + comReabo + primeMigration;
+      const { comRecrutement, comFormule, comReabo, primeMigration, comNette } =
+        computeCommission(
+          {
+            nbRecru: a.nbRecru,
+            caRecru: a.caRecru,
+            caReabo: a.caReabo,
+            nbMigration: a.nbMigration,
+          },
+          COMMISSION_PARAMS,
+        );
 
       return {
         pdv: { code: pdv.code, raisonSociale: pdv.raisonSociale },
