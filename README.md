@@ -98,7 +98,10 @@ IBM Plex Mono (montants/codes).
 
 - [x] **Étape 1 — Socle** : Docker, schéma Prisma (20 modèles), auth JWT + RBAC,
       layout (sidebar 14 modules + header + thème), login, tableau de bord, seed.
-- [ ] Étape 2 — Référentiels (Paramétrage)
+- [x] **Étape 2 — Référentiels (Paramétrage)** : CRUD REST (Formules, Banques,
+      Localités/Secteurs, Entrepôts, PDV, Users) avec RBAC, et 7 pages front
+      câblées à l'API (Formules, Banques, Localités, Entrepôts, Liste PDV,
+      Vadeurs, Comptes PDV) via un composant générique `CrudResourcePage`.
 - [ ] Étape 3 — Cœur métier (Encaissement + reçu, vue mobile, Suivi Solde PDV)
 - [ ] Étape 4 — Finances (Versements, Retraits, Arrêtés)
 - [ ] Étape 5 — Rapports & contrôle (Import, Matching, Commissions)

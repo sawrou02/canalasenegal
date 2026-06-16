@@ -41,3 +41,33 @@ export const getDashboardStats = async () => {
   const res = await apiClient.get('/dashboard/stats')
   return res.data
 }
+
+// Generic CRUD helpers for referential resources
+export const listResource = async <T>(path: string): Promise<T[]> => {
+  const res = await apiClient.get<T[]>(path)
+  return res.data
+}
+
+export const createResource = async <T>(
+  path: string,
+  body: Record<string, unknown>,
+): Promise<T> => {
+  const res = await apiClient.post<T>(path, body)
+  return res.data
+}
+
+export const updateResource = async <T>(
+  path: string,
+  id: string | number,
+  body: Record<string, unknown>,
+): Promise<T> => {
+  const res = await apiClient.patch<T>(`${path}/${id}`, body)
+  return res.data
+}
+
+export const deleteResource = async (
+  path: string,
+  id: string | number,
+): Promise<void> => {
+  await apiClient.delete(`${path}/${id}`)
+}
