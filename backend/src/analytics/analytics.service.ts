@@ -1,0 +1,320 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+
+@Injectable()
+export class AnalyticsService {
+  constructor(private prisma: PrismaService) {}
+
+  /**
+   * Resolve a YYYY-MM period to [start, end) month bounds.
+   * Falls back to the current month for missing/invalid input.
+   */
+  private resolvePeriode(periode?: string): {
+    periode: string;
+    start: Date;
+    end: Date;
+  } {
+    const now = new Date();
+    let year = now.getFullYear();
+    let month = now.getMonth(); // 0-based
+    const m = periode?.match(/^(\d{4})-(\d{1,2})$/);
+    if (m) {
+      year = parseInt(m[1], 10);
+      month = parseInt(m[2], 10) - 1;
+    }
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 1);
+    const normalized = `${year}-${String(month + 1).padStart(2, '0')}`;
+    return { periode: normalized, start, end };
+  }
+
+  private round(value: number, decimals = 0): number {
+    const f = Math.pow(10, decimals);
+    return Math.round(value * f) / f;
+  }
+
+  /**
+   * CA per PDV for the period, split by nature (recrutement / reabonnement).
+   * groupBy(pdvId, nature) merged with PDV + secteur names.
+   */
+  async getCaPdv(periodeParam?: string) {
+    const { start, end } = this.resolvePeriode(periodeParam);
+
+    const grouped = await this.prisma.encaissement.groupBy({
+      by: ['pdvId', 'nature'],
+      where: { date: { gte: start, lt: end } },
+      _count: { _all: true },
+      _sum: { montantTotal: true },
+    });
+
+    const pdvIds = [...new Set(grouped.map((g) => g.pdvId))];
+    const pdvs = await this.prisma.pDV.findMany({
+      where: { id: { in: pdvIds } },
+      select: {
+        id: true,
+        code: true,
+        raisonSociale: true,
+        secteur: { select: { nom: true } },
+      },
+    });
+    const pdvMap = new Map(pdvs.map((p) => [p.id, p]));
+
+    interface Row {
+      nbOps: number;
+      caRecru: number;
+      caReabo: number;
+      caTotal: number;
+    }
+    const aggByPdv = new Map<string, Row>();
+    const ensure = (pdvId: string): Row => {
+      let r = aggByPdv.get(pdvId);
+      if (!r) {
+        r = { nbOps: 0, caRecru: 0, caReabo: 0, caTotal: 0 };
+        aggByPdv.set(pdvId, r);
+      }
+      return r;
+    };
+    for (const g of grouped) {
+      const r = ensure(g.pdvId);
+      const count = g._count?._all || 0;
+      const montant = g._sum?.montantTotal || 0;
+      r.nbOps += count;
+      r.caTotal += montant;
+      if (g.nature === ('RECRUTEMENT' as any)) r.caRecru += montant;
+      else if (g.nature === ('REABONNEMENT' as any)) r.caReabo += montant;
+    }
+
+    const result = pdvIds
+      .map((pdvId) => {
+        const r = aggByPdv.get(pdvId)!;
+        const pdv = pdvMap.get(pdvId);
+        return {
+          pdv: {
+            code: pdv?.code ?? '',
+            raisonSociale: pdv?.raisonSociale ?? '',
+          },
+          secteur: pdv?.secteur?.nom ?? '',
+          nbOps: r.nbOps,
+          caRecru: r.caRecru,
+          caReabo: r.caReabo,
+          caTotal: r.caTotal,
+        };
+      })
+      .sort((a, b) => b.caTotal - a.caTotal);
+
+    return result;
+  }
+
+  /**
+   * Ranked PDV listing by caTotal desc with 1-based rang.
+   */
+  async getClassementPdv(periodeParam?: string) {
+    const caPdv = await this.getCaPdv(periodeParam);
+    return caPdv.map((row, index) => ({
+      rang: index + 1,
+      pdv: row.pdv,
+      secteur: row.secteur,
+      caTotal: row.caTotal,
+      nbOps: row.nbOps,
+    }));
+  }
+
+  /**
+   * CA per formule for the period with share of total CA.
+   */
+  async getCaFormule(periodeParam?: string) {
+    const { start, end } = this.resolvePeriode(periodeParam);
+
+    const grouped = await this.prisma.encaissement.groupBy({
+      by: ['formuleId'],
+      where: { date: { gte: start, lt: end } },
+      _count: { _all: true },
+      _sum: { montantTotal: true },
+    });
+
+    const formuleIds = grouped.map((g) => g.formuleId);
+    const formules = await this.prisma.formule.findMany({
+      where: { id: { in: formuleIds } },
+      select: { id: true, code: true, nomCommercial: true },
+    });
+    const formuleMap = new Map(formules.map((f) => [f.id, f]));
+
+    const totalCA = grouped.reduce(
+      (s, g) => s + (g._sum?.montantTotal || 0),
+      0,
+    );
+
+    const result = grouped
+      .map((g) => {
+        const f = formuleMap.get(g.formuleId);
+        const ca = g._sum?.montantTotal || 0;
+        return {
+          formule: {
+            code: f?.code ?? '',
+            nomCommercial: f?.nomCommercial ?? '',
+          },
+          nb: g._count?._all || 0,
+          ca,
+          part: totalCA > 0 ? this.round((ca / totalCA) * 100, 1) : 0,
+        };
+      })
+      .sort((a, b) => b.ca - a.ca);
+
+    return result;
+  }
+
+  /**
+   * Recruitment / reabonnement stats per user for the period.
+   * groupBy(userId, nature) merged with user names.
+   */
+  async getRecrutementUser(periodeParam?: string) {
+    const { start, end } = this.resolvePeriode(periodeParam);
+
+    const grouped = await this.prisma.encaissement.groupBy({
+      by: ['userId', 'nature'],
+      where: { date: { gte: start, lt: end } },
+      _count: { _all: true },
+      _sum: { montantTotal: true },
+    });
+
+    const userIds = [...new Set(grouped.map((g) => g.userId))];
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, prenom: true, nom: true },
+    });
+    const userMap = new Map(users.map((u) => [u.id, u]));
+
+    interface Row {
+      nbRecru: number;
+      caRecru: number;
+      nbReabo: number;
+      total: number;
+    }
+    const aggByUser = new Map<string, Row>();
+    const ensure = (userId: string): Row => {
+      let r = aggByUser.get(userId);
+      if (!r) {
+        r = { nbRecru: 0, caRecru: 0, nbReabo: 0, total: 0 };
+        aggByUser.set(userId, r);
+      }
+      return r;
+    };
+    for (const g of grouped) {
+      const r = ensure(g.userId);
+      const count = g._count?._all || 0;
+      const montant = g._sum?.montantTotal || 0;
+      r.total += montant;
+      if (g.nature === ('RECRUTEMENT' as any)) {
+        r.nbRecru += count;
+        r.caRecru += montant;
+      } else if (g.nature === ('REABONNEMENT' as any)) {
+        r.nbReabo += count;
+      }
+    }
+
+    const result = userIds
+      .map((userId) => {
+        const r = aggByUser.get(userId)!;
+        const u = userMap.get(userId);
+        return {
+          user: { prenom: u?.prenom ?? '', nom: u?.nom ?? '' },
+          nbRecru: r.nbRecru,
+          caRecru: r.caRecru,
+          nbReabo: r.nbReabo,
+          total: r.total,
+        };
+      })
+      .sort((a, b) => b.total - a.total);
+
+    return result;
+  }
+
+  /**
+   * ARPU per PDV: period CA divided by active subscribers count.
+   */
+  async getArpu(periodeParam?: string) {
+    const { start, end } = this.resolvePeriode(periodeParam);
+
+    const [grouped, abonnesGrouped] = await Promise.all([
+      this.prisma.encaissement.groupBy({
+        by: ['pdvId'],
+        where: { date: { gte: start, lt: end } },
+        _sum: { montantTotal: true },
+      }),
+      this.prisma.abonne.groupBy({
+        by: ['pdvId'],
+        where: { statut: 'ACTIF' as any },
+        _count: { _all: true },
+      }),
+    ]);
+
+    const pdvIds = [...new Set(grouped.map((g) => g.pdvId))];
+    const pdvs = await this.prisma.pDV.findMany({
+      where: { id: { in: pdvIds } },
+      select: { id: true, raisonSociale: true },
+    });
+    const pdvMap = new Map(pdvs.map((p) => [p.id, p]));
+    const abonnesMap = new Map(
+      abonnesGrouped.map((a) => [a.pdvId, a._count?._all || 0]),
+    );
+
+    const result = grouped
+      .map((g) => {
+        const pdv = pdvMap.get(g.pdvId);
+        const caTotal = g._sum?.montantTotal || 0;
+        const abonnesActifs = abonnesMap.get(g.pdvId) || 0;
+        return {
+          pdv: { raisonSociale: pdv?.raisonSociale ?? '' },
+          caTotal,
+          abonnesActifs,
+          arpu: this.round(caTotal / Math.max(abonnesActifs, 1)),
+        };
+      })
+      .sort((a, b) => b.arpu - a.arpu);
+
+    return result;
+  }
+
+  /**
+   * Sold decodeurs (statut VENDU) grouped by type.
+   */
+  async getMaterielsVendus() {
+    const grouped = await this.prisma.decodeur.groupBy({
+      by: ['type'],
+      where: { statut: 'VENDU' as any },
+      _count: { _all: true },
+    });
+
+    const parType = grouped.map((g) => ({
+      type: g.type,
+      nb: g._count?._all || 0,
+    }));
+    const total = parType.reduce((s, t) => s + t.nb, 0);
+
+    return { parType, total };
+  }
+
+  /**
+   * Audit log listing, most recent first.
+   */
+  async getAuditLog(limit = 200) {
+    const logs = await this.prisma.auditLog.findMany({
+      include: { user: { select: { prenom: true, nom: true, role: true } } },
+      orderBy: { timestamp: 'desc' },
+      take: limit,
+    });
+
+    return logs.map((l) => ({
+      id: l.id,
+      timestamp: l.timestamp,
+      action: l.action,
+      module: l.module,
+      ip: l.ip,
+      user: {
+        prenom: l.user.prenom,
+        nom: l.user.nom,
+        role: l.user.role,
+      },
+    }));
+  }
+}

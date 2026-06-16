@@ -119,5 +119,7 @@ IBM Plex Mono (montants/codes).
       10 % CA formule + 10 % CA réabo + prime migration − déductions).
 - [x] **Étape 6 — Service Abonnement** : AAE, échus, non-qualifiés, Suivi M+, Bienvenue, période de recrutement, SMS de rappel en masse (mock), ARPU/réabo — données réelles. Données factices supprimées de la page générique.
 - [x] **Étape 7 — Logistique** : inventaire entrepôt/réseau, consultation décodeurs, recherche décodeur (traçabilité + abonnés liés), immobilisés > 3 mois, mouvements/livraisons (SAT + G11). Seed enrichi (3 entrepôts, 60 décodeurs, mouvements, échéances futures).
-- [ ] Étape 8 — Analytique (États, Suivi Commercial, Statistiques)
+- [x] **Étape 8 — Analytique / Statistiques** : CA par PDV, classement PDV
+      (podium), poids des formules, recrutement par user, ARPU, matériels vendus,
+      et journal d'audit réel (admin-only). Agrégats réels par période.
 - [ ] Étape 9 — Finitions (exports, audit, tests, polish)

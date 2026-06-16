@@ -16,6 +16,7 @@ import { RapportsModule } from './rapports/rapports.module';
 import { CommissionsModule } from './commissions/commissions.module';
 import { ServiceAbonnementModule } from './service-abonnement/service-abonnement.module';
 import { LogistiqueModule } from './logistique/logistique.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { LogistiqueModule } from './logistique/logistique.module';
     CommissionsModule,
     ServiceAbonnementModule,
     LogistiqueModule,
+    AnalyticsModule,
   ],
   providers: [
     {

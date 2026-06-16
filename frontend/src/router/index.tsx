@@ -30,6 +30,13 @@ import DecodeursPage from '../pages/logistique/DecodeursPage'
 import RechercheDecodeurPage from '../pages/logistique/RechercheDecodeurPage'
 import ImmobilisesPage from '../pages/logistique/ImmobilisesPage'
 import MouvementsPage from '../pages/logistique/MouvementsPage'
+import CaPdvPage from '../pages/analytique/CaPdvPage'
+import ClassementPage from '../pages/analytique/ClassementPage'
+import PoidsFormulesPage from '../pages/analytique/PoidsFormulesPage'
+import RecrutementUserPage from '../pages/analytique/RecrutementUserPage'
+import ArpuPage from '../pages/analytique/ArpuPage'
+import MaterielsVendusPage from '../pages/analytique/MaterielsVendusPage'
+import AuditLogPage from '../pages/analytique/AuditLogPage'
 
 function ProtectedRoute() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -122,6 +129,21 @@ export const router = createBrowserRouter([
       },
       { path: 'app/g11-recherche', element: <RechercheDecodeurPage /> },
       { path: 'app/g11-livraison', element: <MouvementsPage title="Livraison G11" /> },
+
+      // --- Analytique / Statistiques ---
+      { path: 'app/stat-ca-pdv', element: <CaPdvPage /> },
+      { path: 'app/stat-classement', element: <ClassementPage /> },
+      {
+        path: 'app/stat-objectif-pdv',
+        element: <CaPdvPage title="Suivi Objectif PDV & SR" />,
+      },
+      { path: 'app/poids-formules', element: <PoidsFormulesPage /> },
+      { path: 'app/recap-recrutement', element: <PoidsFormulesPage /> },
+      { path: 'app/recrut-formule-user', element: <RecrutementUserPage /> },
+      { path: 'app/ana-rendement-users', element: <RecrutementUserPage /> },
+      { path: 'app/arpu', element: <ArpuPage /> },
+      { path: 'app/ana-materiels', element: <MaterielsVendusPage /> },
+      { path: 'app/ana-recap-audit', element: <AuditLogPage /> },
 
       { path: 'app/:pageId', element: <GenericTablePage /> },
     ],

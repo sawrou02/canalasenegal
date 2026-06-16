@@ -643,3 +643,105 @@ export const createMouvement = async (
   const res = await apiClient.post<MouvementRow>('/mouvements', body)
   return res.data
 }
+
+// ---- Analytique / Statistiques ----
+
+export interface CaPdvRow {
+  pdv: { code: string; raisonSociale: string }
+  secteur: string
+  nbOps: number
+  caRecru: number
+  caReabo: number
+  caTotal: number
+}
+
+export interface ClassementPdvRow {
+  rang: number
+  pdv: { code: string; raisonSociale: string }
+  secteur: string
+  caTotal: number
+  nbOps: number
+}
+
+export interface CaFormuleRow {
+  formule: { code: string; nomCommercial: string }
+  nb: number
+  ca: number
+  part: number
+}
+
+export interface RecrutementUserRow {
+  user: { prenom: string; nom: string }
+  nbRecru: number
+  caRecru: number
+  nbReabo: number
+  total: number
+}
+
+export interface ArpuPdvRow {
+  pdv: { raisonSociale: string }
+  caTotal: number
+  abonnesActifs: number
+  arpu: number
+}
+
+export interface MaterielsVendusResult {
+  parType: { type: string; nb: number }[]
+  total: number
+}
+
+export interface AuditLogRow {
+  id: string
+  timestamp: string
+  action: string
+  module: string
+  ip: string
+  user: { prenom: string; nom: string; role: string }
+}
+
+export const caPdv = async (periode?: string): Promise<CaPdvRow[]> => {
+  const res = await apiClient.get<CaPdvRow[]>('/analytics/ca-pdv', {
+    params: periode ? { periode } : undefined,
+  })
+  return Array.isArray(res.data) ? res.data : []
+}
+
+export const classementPdv = async (periode?: string): Promise<ClassementPdvRow[]> => {
+  const res = await apiClient.get<ClassementPdvRow[]>('/analytics/classement-pdv', {
+    params: periode ? { periode } : undefined,
+  })
+  return Array.isArray(res.data) ? res.data : []
+}
+
+export const caFormule = async (periode?: string): Promise<CaFormuleRow[]> => {
+  const res = await apiClient.get<CaFormuleRow[]>('/analytics/ca-formule', {
+    params: periode ? { periode } : undefined,
+  })
+  return Array.isArray(res.data) ? res.data : []
+}
+
+export const recrutementUser = async (periode?: string): Promise<RecrutementUserRow[]> => {
+  const res = await apiClient.get<RecrutementUserRow[]>('/analytics/recrutement-user', {
+    params: periode ? { periode } : undefined,
+  })
+  return Array.isArray(res.data) ? res.data : []
+}
+
+export const arpuPdv = async (periode?: string): Promise<ArpuPdvRow[]> => {
+  const res = await apiClient.get<ArpuPdvRow[]>('/analytics/arpu', {
+    params: periode ? { periode } : undefined,
+  })
+  return Array.isArray(res.data) ? res.data : []
+}
+
+export const materielsVendus = async (): Promise<MaterielsVendusResult> => {
+  const res = await apiClient.get<MaterielsVendusResult>('/analytics/materiels-vendus')
+  return res.data
+}
+
+export const auditLog = async (limit?: number): Promise<AuditLogRow[]> => {
+  const res = await apiClient.get<AuditLogRow[]>('/audit-log', {
+    params: limit !== undefined ? { limit } : undefined,
+  })
+  return Array.isArray(res.data) ? res.data : []
+}
