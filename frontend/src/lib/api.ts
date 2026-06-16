@@ -71,3 +71,62 @@ export const deleteResource = async (
 ): Promise<void> => {
   await apiClient.delete(`${path}/${id}`)
 }
+
+// ---- Encaissement / Abonnés ----
+
+export interface Abonne {
+  id: string
+  numAbonne: string
+  nom: string
+  prenom: string
+  tel1: string
+  dateEcheance: string
+  formule: { id: string; code: string; nomCommercial: string; prixFormule: number }
+  pdv: { id: string; raisonSociale: string }
+  decodeur: { numSerie: string; type: string } | null
+}
+
+export interface EncaissementOptions {
+  premium: boolean
+  intl: boolean
+  timbre: boolean
+}
+
+export interface CreateEncaissementBody {
+  abonneId: string
+  pdvId: string
+  formuleId: string
+  nature: string
+  nbMois: number
+  modePaiement: string
+  options: EncaissementOptions
+  montantRecu: number
+}
+
+export interface Encaissement {
+  id: string
+  recuNumero: string
+  montantTotal: number
+  montantRecu: number
+  monnaieRendue: number
+  nature: string
+  nbMois: number
+  modePaiement: string
+  date: string
+  abonne: { numAbonne: string; nom: string; prenom: string }
+  pdv: { raisonSociale: string }
+  formule: { code: string; nomCommercial: string }
+  user: { prenom: string; nom: string }
+}
+
+export const searchAbonnes = async (q: string): Promise<Abonne[]> => {
+  const res = await apiClient.get<Abonne[]>('/abonnes', { params: { q } })
+  return Array.isArray(res.data) ? res.data : []
+}
+
+export const createEncaissement = async (
+  body: CreateEncaissementBody,
+): Promise<Encaissement> => {
+  const res = await apiClient.post<Encaissement>('/encaissements', body)
+  return res.data
+}

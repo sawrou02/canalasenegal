@@ -26,6 +26,12 @@ export class PdvsController {
     return this.pdvsService.findAll(type, statut);
   }
 
+  @Get('soldes')
+  @UseGuards(JwtAuthGuard)
+  async getSoldes() {
+    return this.pdvsService.getSoldes();
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: string) {

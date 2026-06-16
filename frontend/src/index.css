@@ -55,3 +55,18 @@ body {
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
   background: #374151;
 }
+
+/* Print: only the receipt is visible when printing */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #receipt-print,
+  #receipt-print * {
+    visibility: visible;
+  }
+  #receipt-print {
+    position: absolute;
+    inset: 0;
+  }
+}

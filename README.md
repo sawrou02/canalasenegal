@@ -102,7 +102,11 @@ IBM Plex Mono (montants/codes).
       Localités/Secteurs, Entrepôts, PDV, Users) avec RBAC, et 7 pages front
       câblées à l'API (Formules, Banques, Localités, Entrepôts, Liste PDV,
       Vadeurs, Comptes PDV) via un composant générique `CrudResourcePage`.
-- [ ] Étape 3 — Cœur métier (Encaissement + reçu, vue mobile, Suivi Solde PDV)
+- [x] **Étape 3 — Cœur métier** : Encaissement (`montantTotal = prixFormule×nbMois
+      + options`, `monnaie = reçu − total`, refus si négatif, reçu imprimable,
+      mise à jour du solde PDV), recherche abonné, vue Bureau/Terrain (mobile),
+      et Suivi Solde PDV (`solde = Σ encaissements − Σ versements validés`,
+      dépassement vs caution).
 - [ ] Étape 4 — Finances (Versements, Retraits, Arrêtés)
 - [ ] Étape 5 — Rapports & contrôle (Import, Matching, Commissions)
 - [ ] Étape 6 — Service Abonnement

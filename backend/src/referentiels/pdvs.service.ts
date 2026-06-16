@@ -27,6 +27,51 @@ export class PdvsService {
     });
   }
 
+  async getSoldes() {
+    const pdvs = await this.prisma.pDV.findMany({
+      include: { secteur: { select: { nom: true } } },
+      orderBy: { raisonSociale: 'asc' },
+    });
+
+    const encGroups = await this.prisma.encaissement.groupBy({
+      by: ['pdvId'],
+      _sum: { montantTotal: true },
+    });
+    const versGroups = await this.prisma.versement.groupBy({
+      by: ['pdvId'],
+      where: { statut: 'VALIDE' as any },
+      _sum: { montant: true },
+    });
+
+    const encMap = new Map<string, number>();
+    for (const g of encGroups) {
+      encMap.set(g.pdvId, g._sum.montantTotal || 0);
+    }
+    const versMap = new Map<string, number>();
+    for (const g of versGroups) {
+      versMap.set(g.pdvId, g._sum.montant || 0);
+    }
+
+    return pdvs.map((pdv) => {
+      const totalEncaissements = encMap.get(pdv.id) || 0;
+      const totalVersements = versMap.get(pdv.id) || 0;
+      const solde = totalEncaissements - totalVersements;
+      const plafond = pdv.caution;
+      return {
+        id: pdv.id,
+        code: pdv.code,
+        raisonSociale: pdv.raisonSociale,
+        secteur: { nom: pdv.secteur.nom },
+        totalEncaissements,
+        totalVersements,
+        solde,
+        plafond,
+        depassement: solde > pdv.caution,
+        taux: pdv.caution > 0 ? solde / pdv.caution : 0,
+      };
+    });
+  }
+
   async findOne(id: string) {
     return this.prisma.pDV.findUnique({
       where: { id },
