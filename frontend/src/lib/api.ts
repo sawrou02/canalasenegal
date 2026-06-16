@@ -415,3 +415,84 @@ export const getCommissions = async (periode?: string): Promise<CommissionsResul
   })
   return res.data
 }
+
+// ---- Service Abonnement ----
+
+export type StatutAbonne = 'ACTIF' | 'ECHU' | 'SUSPENDU' | 'RESILIE'
+
+export interface AbonneRow {
+  id: string
+  numAbonne: string
+  nom: string
+  prenom: string
+  tel1: string
+  dateEcheance: string
+  statut: StatutAbonne
+  formule: { code: string; nomCommercial: string }
+  pdv: { raisonSociale: string }
+  motif?: string
+  niveau?: string
+  dateRecrutement?: string
+}
+
+export interface RecrutementRow {
+  id: string
+  date: string
+  montantTotal: number
+  abonne: { numAbonne: string; nom: string; prenom: string }
+  formule: { code: string; nomCommercial: string }
+  pdv: { raisonSociale: string }
+}
+
+export interface ServiceAbonnementStats {
+  total: number
+  actifs: number
+  echus: number
+  suspendus: number
+  resilies: number
+  aae30: number
+  arpu: number
+  tauxReabo: number
+}
+
+export const serviceAbonnementStats = async (): Promise<ServiceAbonnementStats> => {
+  const res = await apiClient.get<ServiceAbonnementStats>('/service-abonnement/stats')
+  return res.data
+}
+
+export const listAAE = async (jours?: number): Promise<AbonneRow[]> => {
+  const res = await apiClient.get<AbonneRow[]>('/service-abonnement/aae', {
+    params: jours !== undefined ? { jours } : undefined,
+  })
+  return Array.isArray(res.data) ? res.data : []
+}
+
+export const listEchus = async (): Promise<AbonneRow[]> => {
+  const res = await apiClient.get<AbonneRow[]>('/service-abonnement/echus')
+  return Array.isArray(res.data) ? res.data : []
+}
+
+export const listNonQualifies = async (): Promise<AbonneRow[]> => {
+  const res = await apiClient.get<AbonneRow[]>('/service-abonnement/non-qualifies')
+  return Array.isArray(res.data) ? res.data : []
+}
+
+export const listSuiviMp = async (): Promise<AbonneRow[]> => {
+  const res = await apiClient.get<AbonneRow[]>('/service-abonnement/suivi-mp')
+  return Array.isArray(res.data) ? res.data : []
+}
+
+export const listBienvenue = async (): Promise<AbonneRow[]> => {
+  const res = await apiClient.get<AbonneRow[]>('/service-abonnement/bienvenue')
+  return Array.isArray(res.data) ? res.data : []
+}
+
+export const listRecrutement = async (): Promise<RecrutementRow[]> => {
+  const res = await apiClient.get<RecrutementRow[]>('/service-abonnement/recrutement')
+  return Array.isArray(res.data) ? res.data : []
+}
+
+export const envoyerSms = async (abonneIds: string[]): Promise<{ sent: number }> => {
+  const res = await apiClient.post<{ sent: number }>('/service-abonnement/sms', { abonneIds })
+  return res.data
+}

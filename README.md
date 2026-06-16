@@ -117,7 +117,7 @@ IBM Plex Mono (montants/codes).
       aperçu + idempotence anti-doublon), Matching rapport vs encaissements
       (écarts), Commissions (calcul mensuel réel par PDV : bonus recrutement +
       10 % CA formule + 10 % CA réabo + prime migration − déductions).
-- [ ] Étape 6 — Service Abonnement
+- [x] **Étape 6 — Service Abonnement** : AAE, échus, non-qualifiés, Suivi M+, Bienvenue, période de recrutement, SMS de rappel en masse (mock), ARPU/réabo — données réelles. Données factices supprimées de la page générique.
 - [ ] Étape 7 — Logistique (SAT, G11, Accessoires, VAD)
 - [ ] Étape 8 — Analytique (États, Suivi Commercial, Statistiques)
 - [ ] Étape 9 — Finitions (exports, audit, tests, polish)

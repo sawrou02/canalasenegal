@@ -14,6 +14,7 @@ import { RetraitsModule } from './retraits/retraits.module';
 import { OperationsBancairesModule } from './operations-bancaires/operations-bancaires.module';
 import { RapportsModule } from './rapports/rapports.module';
 import { CommissionsModule } from './commissions/commissions.module';
+import { ServiceAbonnementModule } from './service-abonnement/service-abonnement.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CommissionsModule } from './commissions/commissions.module';
     OperationsBancairesModule,
     RapportsModule,
     CommissionsModule,
+    ServiceAbonnementModule,
   ],
   providers: [
     {

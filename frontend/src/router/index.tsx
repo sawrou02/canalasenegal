@@ -19,6 +19,12 @@ import VersementsPage from '../pages/finances/VersementsPage'
 import RetraitsPage from '../pages/finances/RetraitsPage'
 import DetailsBancairesPage from '../pages/finances/DetailsBancairesPage'
 import CommissionsPage from '../pages/finances/CommissionsPage'
+import AAEPage from '../pages/service-abonnement/AAEPage'
+import EchusPage from '../pages/service-abonnement/EchusPage'
+import NonQualifiesPage from '../pages/service-abonnement/NonQualifiesPage'
+import SuiviMpPage from '../pages/service-abonnement/SuiviMpPage'
+import BienvenuePage from '../pages/service-abonnement/BienvenuePage'
+import RecrutementPage from '../pages/service-abonnement/RecrutementPage'
 
 function ProtectedRoute() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -57,6 +63,12 @@ export const router = createBrowserRouter([
       { path: 'app/versement-banque', element: <VersementsPage /> },
       { path: 'app/retrait-banque', element: <RetraitsPage /> },
       { path: 'app/details-bancaires', element: <DetailsBancairesPage /> },
+      { path: 'app/aae', element: <AAEPage /> },
+      { path: 'app/liste-echus', element: <EchusPage /> },
+      { path: 'app/abonnes-nonqual', element: <NonQualifiesPage /> },
+      { path: 'app/suivi-mp', element: <SuiviMpPage /> },
+      { path: 'app/bienvenue-abonnes', element: <BienvenuePage /> },
+      { path: 'app/periode-recrutement', element: <RecrutementPage /> },
       { path: 'app/:pageId', element: <GenericTablePage /> },
     ],
   },
