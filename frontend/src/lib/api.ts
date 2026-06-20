@@ -745,3 +745,184 @@ export const auditLog = async (limit?: number): Promise<AuditLogRow[]> => {
   })
   return Array.isArray(res.data) ? res.data : []
 }
+
+// ---------- Dépenses ----------
+export interface DepenseRow {
+  id: string
+  date: string
+  categorie: string
+  motif: string
+  montant: number
+  justificatif?: string | null
+}
+export interface DepensesStats {
+  totalMois: number
+  count: number
+  parCategorie: { categorie: string; montant: number }[]
+}
+export interface CreateDepenseBody {
+  date: string
+  categorie: string
+  motif: string
+  montant: number
+  justificatif?: string
+}
+export const listDepenses = async (periode?: string): Promise<DepenseRow[]> => {
+  const res = await apiClient.get<DepenseRow[]>('/depenses', {
+    params: periode ? { periode } : undefined,
+  })
+  return Array.isArray(res.data) ? res.data : []
+}
+export const depensesStats = async (periode?: string): Promise<DepensesStats> => {
+  const res = await apiClient.get<DepensesStats>('/depenses/stats', {
+    params: periode ? { periode } : undefined,
+  })
+  return res.data
+}
+export const createDepense = async (body: CreateDepenseBody): Promise<DepenseRow> => {
+  const res = await apiClient.post<DepenseRow>('/depenses', body)
+  return res.data
+}
+
+// ---------- Objectifs ----------
+export interface ObjectifRow {
+  id: string
+  pdvId: string | null
+  typeObjectif: string
+  cible: number
+  periode: string
+  pdv?: { raisonSociale: string } | null
+}
+export interface SuiviObjectifRow {
+  id: string
+  pdv: string
+  typeObjectif: string
+  periode: string
+  cible: number
+  realise: number
+  taux: number
+}
+export interface CreateObjectifBody {
+  pdvId?: string
+  typeObjectif: string
+  cible: number
+  periode: string
+}
+export const listObjectifs = async (periode?: string): Promise<ObjectifRow[]> => {
+  const res = await apiClient.get<ObjectifRow[]>('/objectifs', {
+    params: periode ? { periode } : undefined,
+  })
+  return Array.isArray(res.data) ? res.data : []
+}
+export const suiviObjectifs = async (periode?: string): Promise<SuiviObjectifRow[]> => {
+  const res = await apiClient.get<SuiviObjectifRow[]>('/objectifs/suivi', {
+    params: periode ? { periode } : undefined,
+  })
+  return Array.isArray(res.data) ? res.data : []
+}
+export const createObjectif = async (body: CreateObjectifBody): Promise<ObjectifRow> => {
+  const res = await apiClient.post<ObjectifRow>('/objectifs', body)
+  return res.data
+}
+
+// ---------- Accessoires ----------
+export interface AccessoireRow {
+  id: string
+  code: string
+  nom: string
+  prixUnitaire: number
+  stockEntrepot: number
+  stockReseauTotal: number
+  venduTotal: number
+  statut: string
+}
+export interface AccessoiresStats {
+  nbAccessoires: number
+  stockEntrepotTotal: number
+  ventesMoisMontant: number
+  retoursEnAttente: number
+}
+export interface StockReseauRow {
+  id: string
+  quantite: number
+  accessoire: { nom: string; code: string }
+  pdv: { raisonSociale: string }
+}
+export interface VenteAccessoireRow {
+  id: string
+  date: string
+  quantite: number
+  montant: number
+  accessoire: { nom: string; code: string }
+  pdv: { raisonSociale: string }
+}
+export interface RetourRow {
+  id: string
+  date: string
+  quantite: number
+  motif: string
+  statut: string
+  accessoire: { nom: string; code: string }
+  pdv: { raisonSociale: string }
+}
+export const listAccessoires = async (): Promise<AccessoireRow[]> => {
+  const res = await apiClient.get<AccessoireRow[]>('/accessoires')
+  return Array.isArray(res.data) ? res.data : []
+}
+export const accessoiresStats = async (): Promise<AccessoiresStats> => {
+  const res = await apiClient.get<AccessoiresStats>('/accessoires/stats')
+  return res.data
+}
+export const createAccessoire = async (body: {
+  code: string
+  nom: string
+  prixUnitaire: number
+  stockEntrepot?: number
+}): Promise<AccessoireRow> => {
+  const res = await apiClient.post<AccessoireRow>('/accessoires', body)
+  return res.data
+}
+export const approvisionnerAccessoire = async (body: {
+  accessoireId: string
+  quantite: number
+}): Promise<AccessoireRow> => {
+  const res = await apiClient.post<AccessoireRow>('/accessoires/approvisionnement', body)
+  return res.data
+}
+export const listStockReseau = async (): Promise<StockReseauRow[]> => {
+  const res = await apiClient.get<StockReseauRow[]>('/accessoires/stock-reseau')
+  return Array.isArray(res.data) ? res.data : []
+}
+export const livrerAccessoire = async (body: {
+  accessoireId: string
+  pdvId: string
+  quantite: number
+}): Promise<StockReseauRow> => {
+  const res = await apiClient.post<StockReseauRow>('/accessoires/livraison', body)
+  return res.data
+}
+export const listVentesAccessoire = async (): Promise<VenteAccessoireRow[]> => {
+  const res = await apiClient.get<VenteAccessoireRow[]>('/accessoires/ventes')
+  return Array.isArray(res.data) ? res.data : []
+}
+export const vendreAccessoire = async (body: {
+  accessoireId: string
+  pdvId: string
+  quantite: number
+}): Promise<VenteAccessoireRow> => {
+  const res = await apiClient.post<VenteAccessoireRow>('/accessoires/ventes', body)
+  return res.data
+}
+export const listRetours = async (): Promise<RetourRow[]> => {
+  const res = await apiClient.get<RetourRow[]>('/accessoires/retours')
+  return Array.isArray(res.data) ? res.data : []
+}
+export const creerRetour = async (body: {
+  accessoireId: string
+  pdvId: string
+  quantite: number
+  motif: string
+}): Promise<RetourRow> => {
+  const res = await apiClient.post<RetourRow>('/accessoires/retours', body)
+  return res.data
+}

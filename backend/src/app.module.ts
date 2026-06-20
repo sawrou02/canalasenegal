@@ -17,6 +17,9 @@ import { CommissionsModule } from './commissions/commissions.module';
 import { ServiceAbonnementModule } from './service-abonnement/service-abonnement.module';
 import { LogistiqueModule } from './logistique/logistique.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { DepensesModule } from './depenses/depenses.module';
+import { ObjectifsModule } from './objectifs/objectifs.module';
+import { AccessoiresModule } from './accessoires/accessoires.module';
 
 @Module({
   imports: [
@@ -37,6 +40,9 @@ import { AnalyticsModule } from './analytics/analytics.module';
     ServiceAbonnementModule,
     LogistiqueModule,
     AnalyticsModule,
+    DepensesModule,
+    ObjectifsModule,
+    AccessoiresModule,
   ],
   providers: [
     {

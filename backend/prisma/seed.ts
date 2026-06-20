@@ -1760,6 +1760,106 @@ async function main() {
 
   console.log('Versements du mois courant created');
 
+  // ---------- Accessoires ----------
+  const accessoiresData = [
+    { id: 'acc-001', code: 'ACC-TEL', nom: 'Télécommande universelle', prixUnitaire: 3500, stockEntrepot: 420 },
+    { id: 'acc-002', code: 'ACC-HDMI', nom: 'Câble HDMI 1.5m', prixUnitaire: 2000, stockEntrepot: 350 },
+    { id: 'acc-003', code: 'ACC-LNB', nom: 'LNB universel', prixUnitaire: 6000, stockEntrepot: 180 },
+    { id: 'acc-004', code: 'ACC-SUP', nom: 'Support mural parabole', prixUnitaire: 8000, stockEntrepot: 95 },
+    { id: 'acc-005', code: 'ACC-CARTE', nom: "Carte d'abonnement", prixUnitaire: 15000, stockEntrepot: 500 },
+    { id: 'acc-006', code: 'ACC-ADAPT', nom: 'Adaptateur secteur', prixUnitaire: 4500, stockEntrepot: 260 },
+  ];
+  for (const a of accessoiresData) {
+    await prisma.accessoire.upsert({ where: { id: a.id }, update: a, create: a });
+  }
+  const accPrix: Record<string, number> = Object.fromEntries(
+    accessoiresData.map((a) => [a.id, a.prixUnitaire]),
+  );
+  console.log('Accessoires created');
+
+  const accPdvIds = [pdv1.id, pdv2.id, pdv3.id, pdv4.id, pdv5.id, pdv6.id];
+  const accIds = accessoiresData.map((a) => a.id);
+  for (let i = 0; i < 10; i++) {
+    const accId = accIds[i % accIds.length];
+    // offset the PDV index so every (accessoire, pdv) pair stays unique
+    const pdvId = accPdvIds[(i + Math.floor(i / accPdvIds.length)) % accPdvIds.length];
+    const data = {
+      id: `sacc-${String(i + 1).padStart(3, '0')}`,
+      accessoireId: accId,
+      pdvId,
+      quantite: 5 + ((i * 7) % 36),
+    };
+    await prisma.stockAccessoire.upsert({
+      where: { accessoireId_pdvId: { accessoireId: accId, pdvId } },
+      update: { quantite: data.quantite },
+      create: data,
+    });
+  }
+  console.log('Stock accessoires réseau created');
+
+  for (let i = 0; i < 12; i++) {
+    const accId = accIds[i % accIds.length];
+    const pdvId = accPdvIds[i % accPdvIds.length];
+    const quantite = 1 + (i % 8);
+    const data = {
+      id: `vacc-${String(i + 1).padStart(3, '0')}`,
+      accessoireId: accId,
+      pdvId,
+      quantite,
+      montant: quantite * accPrix[accId],
+      date: new Date(curYear, curMonth, Math.min(1 + ((i * 2) % 27), curToday)),
+    };
+    await prisma.venteAccessoire.upsert({ where: { id: data.id }, update: data, create: data });
+  }
+  console.log('Ventes accessoires created');
+
+  const retoursData = [
+    { id: 'ret-001', accessoireId: 'acc-003', pdvId: pdv1.id, quantite: 2, motif: 'LNB défectueux', statut: 'EN_ATTENTE' },
+    { id: 'ret-002', accessoireId: 'acc-001', pdvId: pdv3.id, quantite: 1, motif: 'Télécommande HS', statut: 'EN_ATTENTE' },
+    { id: 'ret-003', accessoireId: 'acc-006', pdvId: pdv5.id, quantite: 3, motif: 'Adaptateurs grillés', statut: 'TRAITE' },
+  ];
+  for (const r of retoursData) {
+    await prisma.retourDefectueux.upsert({ where: { id: r.id }, update: r, create: r });
+  }
+  console.log('Retours défectueux created');
+
+  // ---------- Objectifs ----------
+  const objectifsData = [
+    { id: 'obj-001', pdvId: null as string | null, typeObjectif: 'CA', cible: 5000000, periode: curPeriode },
+    { id: 'obj-002', pdvId: null as string | null, typeObjectif: 'RECRUTEMENT', cible: 300, periode: curPeriode },
+    { id: 'obj-003', pdvId: pdv1.id, typeObjectif: 'RECRUTEMENT', cible: 40, periode: curPeriode },
+    { id: 'obj-004', pdvId: pdv1.id, typeObjectif: 'CA', cible: 600000, periode: curPeriode },
+    { id: 'obj-005', pdvId: pdv2.id, typeObjectif: 'REABO', cible: 60, periode: curPeriode },
+    { id: 'obj-006', pdvId: pdv3.id, typeObjectif: 'RECRUTEMENT', cible: 35, periode: curPeriode },
+    { id: 'obj-007', pdvId: pdv4.id, typeObjectif: 'CA', cible: 450000, periode: curPeriode },
+    { id: 'obj-008', pdvId: pdv5.id, typeObjectif: 'REABO', cible: 50, periode: curPeriode },
+  ];
+  for (const o of objectifsData) {
+    await prisma.objectif.upsert({ where: { id: o.id }, update: o, create: o });
+  }
+  console.log('Objectifs created');
+
+  // ---------- Dépenses internes ----------
+  const categories = ['Loyer', 'Carburant', 'Salaires', 'Maintenance', 'Fournitures'];
+  const motifs = [
+    'Loyer agence Dakar', 'Carburant tournée terrain', 'Avance salaire vendeur',
+    'Maintenance véhicule', 'Fournitures de bureau', 'Loyer entrepôt Thiès',
+    'Carburant livraison', 'Réparation groupe électrogène', 'Consommables techniques',
+    'Frais de communication',
+  ];
+  for (let i = 0; i < 10; i++) {
+    const data = {
+      id: `dep-${String(i + 1).padStart(3, '0')}`,
+      date: new Date(curYear, curMonth, Math.min(1 + ((i * 3) % 27), curToday)),
+      categorie: categories[i % categories.length],
+      motif: motifs[i % motifs.length],
+      montant: 50000 + ((i * 37000) % 450000),
+      justificatif: i % 3 === 0 ? `FACT-2026-${100 + i}` : null,
+    };
+    await prisma.depense.upsert({ where: { id: data.id }, update: data, create: data });
+  }
+  console.log('Dépenses created');
+
   console.log('Seed completed successfully!');
   console.log('');
   console.log('Test accounts (password: Demo123!):');

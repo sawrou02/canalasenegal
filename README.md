@@ -126,3 +126,7 @@ IBM Plex Mono (montants/codes).
       commissions / soldes / matching), logique métier extraite dans `src/domain/`,
       documentation API Swagger (`/api/docs`), seed enrichi (données du mois courant
       pour dashboard/analytics/commissions).
+- [x] **Modules complémentaires** : Dépenses internes, Objectifs Distributeur/PDV
+      (suivi cible vs réalisé), Gestion Accessoires complète (catalogue,
+      approvisionnement, livraison réseau, ventes, retours défectueux) — nouveaux
+      modèles Prisma + données seed réelles.

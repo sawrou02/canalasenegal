@@ -156,6 +156,10 @@ model PDV {
   versements    Versement[]
   retraits      Retrait[]
   decodeurs     Decodeur[]
+  objectifs        Objectif[]
+  stocksAccessoire StockAccessoire[]
+  ventesAccessoire VenteAccessoire[]
+  retoursAccessoire RetourDefectueux[]
 }
 
 model Formule {
@@ -340,4 +344,74 @@ model Notification {
   lu        Boolean          @default(false)
   dismissed Boolean          @default(false)
   createdAt DateTime         @default(now())
+}
+
+model Depense {
+  id           String   @id @default(cuid())
+  date         DateTime
+  categorie    String
+  motif        String
+  montant      Float
+  justificatif String?
+  createdAt    DateTime @default(now())
+}
+
+model Objectif {
+  id           String  @id @default(cuid())
+  pdvId        String?
+  typeObjectif String
+  cible        Float
+  periode      String
+
+  pdv PDV? @relation(fields: [pdvId], references: [id])
+}
+
+model Accessoire {
+  id            String  @id @default(cuid())
+  code          String  @unique
+  nom           String
+  prixUnitaire  Float
+  stockEntrepot Int     @default(0)
+  statut        Statut  @default(ACTIF)
+
+  stocksReseau StockAccessoire[]
+  ventes       VenteAccessoire[]
+  retours      RetourDefectueux[]
+}
+
+model StockAccessoire {
+  id           String @id @default(cuid())
+  accessoireId String
+  pdvId        String
+  quantite     Int    @default(0)
+
+  accessoire Accessoire @relation(fields: [accessoireId], references: [id])
+  pdv        PDV        @relation(fields: [pdvId], references: [id])
+
+  @@unique([accessoireId, pdvId])
+}
+
+model VenteAccessoire {
+  id           String   @id @default(cuid())
+  accessoireId String
+  pdvId        String
+  quantite     Int
+  montant      Float
+  date         DateTime @default(now())
+
+  accessoire Accessoire @relation(fields: [accessoireId], references: [id])
+  pdv        PDV        @relation(fields: [pdvId], references: [id])
+}
+
+model RetourDefectueux {
+  id           String   @id @default(cuid())
+  accessoireId String
+  pdvId        String
+  quantite     Int
+  motif        String
+  statut       String   @default("EN_ATTENTE")
+  date         DateTime @default(now())
+
+  accessoire Accessoire @relation(fields: [accessoireId], references: [id])
+  pdv        PDV        @relation(fields: [pdvId], references: [id])
 }

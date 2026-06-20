@@ -37,6 +37,12 @@ import RecrutementUserPage from '../pages/analytique/RecrutementUserPage'
 import ArpuPage from '../pages/analytique/ArpuPage'
 import MaterielsVendusPage from '../pages/analytique/MaterielsVendusPage'
 import AuditLogPage from '../pages/analytique/AuditLogPage'
+import DepensesPage from '../pages/operations/DepensesPage'
+import ObjectifsPage from '../pages/parametrage/ObjectifsPage'
+import AccessoiresCataloguePage from '../pages/accessoires/CataloguePage'
+import AccessoiresLivraisonPage from '../pages/accessoires/LivraisonPage'
+import AccessoiresVentesPage from '../pages/accessoires/VentesPage'
+import AccessoiresRetoursPage from '../pages/accessoires/RetoursPage'
 
 function ProtectedRoute() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -144,6 +150,35 @@ export const router = createBrowserRouter([
       { path: 'app/arpu', element: <ArpuPage /> },
       { path: 'app/ana-materiels', element: <MaterielsVendusPage /> },
       { path: 'app/ana-recap-audit', element: <AuditLogPage /> },
+
+      // --- Dépenses & Objectifs ---
+      { path: 'app/depenses', element: <DepensesPage /> },
+      { path: 'app/objectifs', element: <ObjectifsPage /> },
+
+      // --- Gestion Accessoires ---
+      {
+        path: 'app/acc-consultation-entrepot',
+        element: <AccessoiresCataloguePage title="Consultation stock Entrepôt" />,
+      },
+      {
+        path: 'app/acc-appro-entrepot',
+        element: <AccessoiresCataloguePage enableAppro title="Approvisionnement Entrepôt" />,
+      },
+      {
+        path: 'app/acc-init-reseau',
+        element: <AccessoiresLivraisonPage title="Initialisation stock Réseau" />,
+      },
+      { path: 'app/acc-livraison', element: <AccessoiresLivraisonPage title="Livraison" /> },
+      {
+        path: 'app/acc-consultation-reseau',
+        element: <AccessoiresLivraisonPage readOnly title="Consultation stock Réseau" />,
+      },
+      { path: 'app/acc-suivi-ventes', element: <AccessoiresVentesPage /> },
+      {
+        path: 'app/acc-versement-pdv',
+        element: <AccessoiresVentesPage title="Versement PDV / Ventes accessoires" />,
+      },
+      { path: 'app/acc-retour-defectueux', element: <AccessoiresRetoursPage /> },
 
       { path: 'app/:pageId', element: <GenericTablePage /> },
     ],
