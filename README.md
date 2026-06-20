@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SENDISTRI — ERP de distribution télécom
 
 Application web de gestion commerciale pour un distributeur télécom au Sénégal
@@ -136,3 +137,7 @@ IBM Plex Mono (montants/codes).
       attente), Augmentation de caution, Suivi installation, Consultation G11,
       Liste réabo MOMO, Base de données globale — données réelles. Vues Suivi
       Commercial / États restantes branchées sur les agrégats réels existants.
+=======
+# canalasenegal
+canal senegal
+>>>>>>> 18ea99d716bff95f41742ee1df16e601d9d92a6c
