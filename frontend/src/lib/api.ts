@@ -993,3 +993,117 @@ export const vadVenteKit = async (body: {
   const res = await apiClient.post<VenteKitRow>('/vad/vente-kit', body)
   return res.data
 }
+
+// ---------- Crédit ----------
+export interface CreditRow {
+  id: string
+  pdvId: string
+  plafond: number
+  avoir: number
+  dette: number
+  encours: number
+  creditDispo: number
+  pdv: { code: string; raisonSociale: string }
+}
+export const listCredits = async (): Promise<CreditRow[]> => {
+  const res = await apiClient.get<CreditRow[]>('/credits')
+  return Array.isArray(res.data) ? res.data : []
+}
+export const rapportDette = async (): Promise<CreditRow[]> => {
+  const res = await apiClient.get<CreditRow[]>('/rapport-dette')
+  return Array.isArray(res.data) ? res.data : []
+}
+
+// ---------- Arrêtés de soldes ----------
+export interface ArreteRow {
+  id: string
+  periode: string
+  soldeFige: number
+  dateArrete: string
+  statut: string
+  pdv: { code: string; raisonSociale: string }
+}
+export const listArretes = async (): Promise<ArreteRow[]> => {
+  const res = await apiClient.get<ArreteRow[]>('/arretes')
+  return Array.isArray(res.data) ? res.data : []
+}
+export const createArrete = async (body: { pdvId: string; periode: string }): Promise<ArreteRow> => {
+  const res = await apiClient.post<ArreteRow>('/arretes', body)
+  return res.data
+}
+
+// ---------- Suivi installation ----------
+export interface InstallationRow {
+  id: string
+  clientNom: string
+  technicien: string
+  dateDemande: string
+  dateInstallation: string | null
+  statut: string
+  pdv: { raisonSociale: string }
+}
+export interface InstallationStats {
+  demandees: number
+  installees: number
+  total: number
+  taux: number
+}
+export const listInstallations = async (): Promise<InstallationRow[]> => {
+  const res = await apiClient.get<InstallationRow[]>('/installations')
+  return Array.isArray(res.data) ? res.data : []
+}
+export const installationStats = async (): Promise<InstallationStats> => {
+  const res = await apiClient.get<InstallationStats>('/installations/stats')
+  return res.data
+}
+export const createInstallation = async (body: {
+  pdvId: string
+  clientNom: string
+  technicien: string
+}): Promise<InstallationRow> => {
+  const res = await apiClient.post<InstallationRow>('/installations', body)
+  return res.data
+}
+export const updateInstallation = async (
+  id: string,
+  body: { statut?: string; technicien?: string },
+): Promise<InstallationRow> => {
+  const res = await apiClient.patch<InstallationRow>(`/installations/${id}`, body)
+  return res.data
+}
+
+// ---------- Augmentation caution ----------
+export const augmenterCaution = async (pdvId: string, montant: number) => {
+  const res = await apiClient.post(`/pdvs/${pdvId}/caution`, { montant })
+  return res.data
+}
+
+// ---------- Réabo MOMO & BDD globale ----------
+export interface ReaboMomoRow {
+  id: string
+  date: string
+  numAbonne: string
+  client: string
+  formule: string
+  pdv: string
+  montant: number
+  canal: string
+}
+export interface BddAbonneRow {
+  id: string
+  numAbonne: string
+  client: string
+  tel1: string
+  formule: string
+  pdv: string
+  statut: string
+  dateEcheance: string
+}
+export const reaboMomo = async (): Promise<ReaboMomoRow[]> => {
+  const res = await apiClient.get<ReaboMomoRow[]>('/analytics/reabo-momo')
+  return Array.isArray(res.data) ? res.data : []
+}
+export const bddGlobale = async (): Promise<BddAbonneRow[]> => {
+  const res = await apiClient.get<BddAbonneRow[]>('/analytics/bdd-globale')
+  return Array.isArray(res.data) ? res.data : []
+}

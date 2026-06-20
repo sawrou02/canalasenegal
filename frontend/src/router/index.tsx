@@ -46,6 +46,12 @@ import AccessoiresRetoursPage from '../pages/accessoires/RetoursPage'
 import VadConsultationPage from '../pages/vad/ConsultationPage'
 import VadLivraisonPage from '../pages/vad/LivraisonPage'
 import VadVenteKitPage from '../pages/vad/VenteKitPage'
+import CreditPage from '../pages/credit/CreditPage'
+import ArretesPage from '../pages/operations/ArretesPage'
+import AugmentationCautionPage from '../pages/operations/AugmentationCautionPage'
+import InstallationsPage from '../pages/operations/InstallationsPage'
+import ReaboMomoPage from '../pages/analytique/ReaboMomoPage'
+import BddGlobalePage from '../pages/analytique/BddGlobalePage'
 
 function ProtectedRoute() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -206,6 +212,18 @@ export const router = createBrowserRouter([
       { path: 'app/ana-objectifs-pdv', element: <ObjectifsPage /> },
       { path: 'app/ana-recap-objectif', element: <ObjectifsPage /> },
       { path: 'app/ana-recap-activites', element: <RapportActivitePage /> },
+
+      // --- B) Gestion Crédit, Arrêtés, Caution, Installation ---
+      { path: 'app/suivi-credit', element: <CreditPage /> },
+      { path: 'app/rapport-dette', element: <CreditPage onlyDette /> },
+      { path: 'app/arretes-soldes', element: <ArretesPage /> },
+      { path: 'app/augmentation-caution', element: <AugmentationCautionPage /> },
+      { path: 'app/suivi-installation', element: <InstallationsPage /> },
+      { path: 'app/consultation-g11', element: <DecodeursPage type="G11" title="Consultation G11" /> },
+
+      // --- B) Vues réelles supplémentaires ---
+      { path: 'app/reabo-momo', element: <ReaboMomoPage /> },
+      { path: 'app/bdd-globale', element: <BddGlobalePage /> },
 
       { path: 'app/:pageId', element: <GenericTablePage /> },
     ],

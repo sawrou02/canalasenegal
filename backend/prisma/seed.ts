@@ -1892,6 +1892,50 @@ async function main() {
     console.log('Ventes Kit VAD created');
   }
 
+  // ---------- Gestion Crédit ----------
+  const creditPdvs = [pdv1, pdv2, pdv3, pdv4, pdv5, pdv6];
+  for (let i = 0; i < creditPdvs.length; i++) {
+    const plafond = 2000000 + i * 500000;
+    const avoir = i % 2 === 0 ? 150000 : 0;
+    const dette = 300000 + i * 220000;
+    await prisma.credit.upsert({
+      where: { pdvId: creditPdvs[i].id },
+      update: { plafond, avoir, dette },
+      create: { pdvId: creditPdvs[i].id, plafond, avoir, dette },
+    });
+  }
+  console.log('Crédits created');
+
+  // ---------- Arrêtés de soldes ----------
+  const arretesData = [
+    { id: 'arr-001', pdvId: pdv1.id, periode: '2026-05', soldeFige: 1240000, statut: 'SIGNE' },
+    { id: 'arr-002', pdvId: pdv2.id, periode: '2026-05', soldeFige: 880000, statut: 'SIGNE' },
+    { id: 'arr-003', pdvId: pdv3.id, periode: '2026-04', soldeFige: 1560000, statut: 'SIGNE' },
+  ];
+  for (const a of arretesData) {
+    await prisma.arreteSolde.upsert({ where: { id: a.id }, update: a, create: a });
+  }
+  console.log('Arrêtés de soldes created');
+
+  // ---------- Suivi installation ----------
+  const techs = ['Modou Diène', 'Aliou Sané', 'Pape Mbaye'];
+  const instClients = ['Famille Ndiaye', 'Restaurant Teranga', 'Boutique Aïda', 'Cabinet Sow', 'Hôtel Saloum', 'M. Diallo', 'Mme Faye', 'Pharmacie Liberté'];
+  const instStatuts = ['DEMANDEE', 'INSTALLEE', 'INSTALLEE', 'DEMANDEE', 'ANNULEE'];
+  for (let i = 0; i < 8; i++) {
+    const statut = instStatuts[i % instStatuts.length];
+    const data = {
+      id: `inst-${String(i + 1).padStart(3, '0')}`,
+      pdvId: creditPdvs[i % creditPdvs.length].id,
+      clientNom: instClients[i % instClients.length],
+      technicien: techs[i % techs.length],
+      dateDemande: new Date(curYear, curMonth, Math.min(1 + ((i * 3) % 27), curToday)),
+      dateInstallation: statut === 'INSTALLEE' ? new Date(curYear, curMonth, Math.min(2 + ((i * 3) % 26), curToday)) : null,
+      statut,
+    };
+    await prisma.installation.upsert({ where: { id: data.id }, update: data, create: data });
+  }
+  console.log('Installations created');
+
   console.log('Seed completed successfully!');
   console.log('');
   console.log('Test accounts (password: Demo123!):');

@@ -7,6 +7,13 @@ import { UpdatePdvDto } from './dto/update-pdv.dto';
 export class PdvsService {
   constructor(private prisma: PrismaService) {}
 
+  async augmenterCaution(id: string, montant: number) {
+    return this.prisma.pDV.update({
+      where: { id },
+      data: { caution: { increment: montant } },
+    });
+  }
+
   async findAll(type?: string, statut?: string) {
     const where: any = {};
     if (type) {

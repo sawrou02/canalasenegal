@@ -131,3 +131,8 @@ IBM Plex Mono (montants/codes).
       approvisionnement, livraison réseau, ventes, retours défectueux), et
       Gestion des VAD (agents, stock décodeurs, livraison/attribution, vente kit)
       — nouveaux modèles Prisma + données seed réelles.
+- [x] **Modules finaux** : Gestion Crédit (suivi crédit affectable, rapport dette),
+      Arrêtés de soldes (clôture avec règle métier #7 : interdit si versements en
+      attente), Augmentation de caution, Suivi installation, Consultation G11,
+      Liste réabo MOMO, Base de données globale — données réelles. Vues Suivi
+      Commercial / États restantes branchées sur les agrégats réels existants.

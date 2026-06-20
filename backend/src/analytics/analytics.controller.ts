@@ -45,6 +45,18 @@ export class AnalyticsController {
     return this.analyticsService.getMaterielsVendus();
   }
 
+  @Get('analytics/reabo-momo')
+  @UseGuards(JwtAuthGuard)
+  async getReaboMomo() {
+    return this.analyticsService.getReaboMomo();
+  }
+
+  @Get('analytics/bdd-globale')
+  @UseGuards(JwtAuthGuard)
+  async getBddGlobale() {
+    return this.analyticsService.getBddGlobale();
+  }
+
   @Get('audit-log')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)

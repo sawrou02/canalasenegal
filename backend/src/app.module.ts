@@ -21,6 +21,9 @@ import { DepensesModule } from './depenses/depenses.module';
 import { ObjectifsModule } from './objectifs/objectifs.module';
 import { AccessoiresModule } from './accessoires/accessoires.module';
 import { VadModule } from './vad/vad.module';
+import { CreditModule } from './credit/credit.module';
+import { ArretesModule } from './arretes/arretes.module';
+import { InstallationsModule } from './installations/installations.module';
 
 @Module({
   imports: [
@@ -45,6 +48,9 @@ import { VadModule } from './vad/vad.module';
     ObjectifsModule,
     AccessoiresModule,
     VadModule,
+    CreditModule,
+    ArretesModule,
+    InstallationsModule,
   ],
   providers: [
     {

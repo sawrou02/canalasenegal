@@ -161,6 +161,9 @@ model PDV {
   ventesAccessoire VenteAccessoire[]
   retoursAccessoire RetourDefectueux[]
   ventesKit         VenteKit[]
+  credit            Credit?
+  arretes           ArreteSolde[]
+  installations     Installation[]
 }
 
 model Formule {
@@ -426,4 +429,38 @@ model VenteKit {
   date         DateTime     @default(now())
 
   vadPdv PDV @relation(fields: [vadPdvId], references: [id])
+}
+
+model Credit {
+  id        String   @id @default(cuid())
+  pdvId     String   @unique
+  plafond   Float    @default(0)
+  avoir     Float    @default(0)
+  dette     Float    @default(0)
+  updatedAt DateTime @updatedAt
+
+  pdv PDV @relation(fields: [pdvId], references: [id])
+}
+
+model ArreteSolde {
+  id         String   @id @default(cuid())
+  pdvId      String
+  periode    String
+  soldeFige  Float
+  dateArrete DateTime @default(now())
+  statut     String   @default("SIGNE")
+
+  pdv PDV @relation(fields: [pdvId], references: [id])
+}
+
+model Installation {
+  id              String    @id @default(cuid())
+  pdvId           String
+  clientNom       String
+  technicien      String
+  dateDemande     DateTime  @default(now())
+  dateInstallation DateTime?
+  statut          String    @default("DEMANDEE")
+
+  pdv PDV @relation(fields: [pdvId], references: [id])
 }

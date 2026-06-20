@@ -317,4 +317,53 @@ export class AnalyticsService {
       },
     }));
   }
+
+  /** Réabonnements réglés via mobile money (Wave / Orange Money). */
+  async getReaboMomo() {
+    const rows = await this.prisma.encaissement.findMany({
+      where: {
+        nature: 'REABONNEMENT' as any,
+        modePaiement: { in: ['WAVE', 'ORANGE_MONEY'] as any },
+      },
+      include: {
+        abonne: { select: { numAbonne: true, nom: true, prenom: true } },
+        formule: { select: { nomCommercial: true } },
+        pdv: { select: { raisonSociale: true } },
+      },
+      orderBy: { date: 'desc' },
+      take: 200,
+    });
+    return rows.map((r) => ({
+      id: r.id,
+      date: r.date,
+      numAbonne: r.abonne?.numAbonne ?? '—',
+      client: [r.abonne?.prenom, r.abonne?.nom].filter(Boolean).join(' ') || '—',
+      formule: r.formule?.nomCommercial ?? '—',
+      pdv: r.pdv?.raisonSociale ?? '—',
+      montant: r.montantTotal,
+      canal: r.modePaiement,
+    }));
+  }
+
+  /** Global subscriber database. */
+  async getBddGlobale() {
+    const rows = await this.prisma.abonne.findMany({
+      include: {
+        formule: { select: { nomCommercial: true } },
+        pdv: { select: { raisonSociale: true } },
+      },
+      orderBy: { nom: 'asc' },
+      take: 1000,
+    });
+    return rows.map((a) => ({
+      id: a.id,
+      numAbonne: a.numAbonne,
+      client: [a.prenom, a.nom].filter(Boolean).join(' '),
+      tel1: a.tel1,
+      formule: a.formule?.nomCommercial ?? '—',
+      pdv: a.pdv?.raisonSociale ?? '—',
+      statut: a.statut,
+      dateEcheance: a.dateEcheance,
+    }));
+  }
 }
